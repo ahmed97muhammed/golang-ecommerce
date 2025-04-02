@@ -16,24 +16,45 @@ var jwtKey = []byte(utils.GetEnv("JWT_SECRET")) // تحميل المفتاح م�
 func Register(c *gin.Context) {
 	var newUser models.User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input, please provide valid JSON"})
 		return
 	}
 
-	// تشفير كلمة المرور
+	// Validation: Check if username and password are provided
+	if newUser.Username == "" || newUser.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username and password are required"})
+		return
+	}
+
+	// Validation: Check if username is already taken
+	existingUser, err := models.GetUserByUsername(newUser.Username)
+	if err == nil && existingUser != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username is already taken"})
+		return
+	}
+
+	// Validation: Check if username is already taken
+	existingUser2, err := models.GetUserByEmail(newUser.Email)
+	if err == nil && existingUser2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email is already taken"})
+		return
+	}
+
+	// Hashing the password before saving
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while hashing password 1"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while hashing password"})
 		return
 	}
 	newUser.Password = string(hashedPassword)
 
-	// إدخال المستخدم في قاعدة البيانات
+	// Insert the user into the database
 	if err := newUser.Create(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while registering user 2"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while registering user"})
 		return
 	}
 
+	// Success response
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 

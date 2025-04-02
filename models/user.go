@@ -55,3 +55,15 @@ func GetUserByUsername(username string) (*User, error) {
 	}
 	return &user, nil
 }
+
+func GetUserByEmail(email string) (*User, error) {
+	var user User
+	err := db.QueryRow("SELECT id, username, password, email FROM users WHERE email = ?", email).Scan(&user.ID, &user.Username, &user.Password, &user.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
+	return &user, nil
+}
