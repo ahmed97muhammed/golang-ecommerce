@@ -10,10 +10,11 @@ import (
 var db *sql.DB
 
 type User struct {
-	ID       int    `json:"id"`
+	ID    int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-	Email    string `json:"email"`
 }
 
 type Credentials struct {

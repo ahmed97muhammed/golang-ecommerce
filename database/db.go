@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"github.com/joho/godotenv"
 	"os"
+	"golang_auth/models"
 )
 
 // Global variable for the DB connection
@@ -38,7 +39,22 @@ func InitDB() {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	// Optional: Auto-migrate your models to keep the schema updated
-	// db.AutoMigrate(&models.Product{})
+	// List of models to migrate
+	modelsList := []interface{}{
+        &models.Product{},
+        &models.User{},      
+        &models.Order{},      
+    }
+
+    // Migrate each model
+    for _, model := range modelsList {
+        err := DB.AutoMigrate(model)
+        if err != nil {
+            fmt.Printf("Error migrating %T: %v\n", model, err)
+        } else {
+            fmt.Printf("Successfully migrated %T\n", model)
+        }
+    }
+	
 	fmt.Println("Database connection established successfully")
 }

@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"golang_auth/database"
 	"golang_auth/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"golang_auth/database"
 )
 
 // GetProducts retrieves all products from the database
